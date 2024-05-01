@@ -98,7 +98,6 @@ class Board():
         elif command == 'C' and not cell.hidden: # if the click an opened spot
             if cell.numTouchingFlags == int(cell.state):
                 no_mines_found = self.unhideNeighbors(row, col)
-                print(no_mines_found)
                 if not no_mines_found:
                     self.unhideBoard()
                     self.displayBoard(game_over=True)
@@ -137,7 +136,6 @@ class Board():
             neighbors = getNeighbors(l[0][0], l[0][1], self.row, self.col)
             for pair in neighbors:
                 cell = self.mat[pair[0]][pair[1]]
-                print(pair, cell.state, cell.flagged)
                 if cell.state == "M" and not cell.flagged:
                     return False
                 if (pair not in l) and (cell.hidden) and (cell.numTouchingFlags == int(cell.state)):
