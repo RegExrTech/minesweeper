@@ -14,11 +14,14 @@ class Cell():
         self.numTouchingFlags = 0
         self.neighbors = []
 
-    def getString(self):
+    def getString(self, game_over=False):
         if self.hidden:
             return Back.BLACK + "   " + Style.RESET_ALL + "|"
         if self.flagged == True:
-            return ' ' + Fore.RED + 'F' + Style.RESET_ALL + ' |'
+            if game_over:
+                return Back.LIGHTWHITE_EX + ' ' + Fore.RED + self.state + ' ' + Style.RESET_ALL  + '|'
+            else:
+                return ' ' + Fore.RED + 'F' + Style.RESET_ALL + ' |'
         if self.state == '0':
                 color = Fore.BLACK
         elif self.state == '1':
@@ -26,7 +29,7 @@ class Cell():
         elif self.state == '2':
                 color = Fore.GREEN
         elif self.state == '3':
-                color = Fore.RED
+                color = Fore.LIGHTMAGENTA_EX
         elif self.state == '4':
                 color = Fore.BLUE
         elif self.state == '5':
@@ -34,7 +37,7 @@ class Cell():
         elif self.state == '6':
                 color = Fore.YELLOW
         elif self.state == '7':
-                color = Fore.WHITE
+                color = Fore.LIGHTGREEN_EX
         elif self.state == '8':
                 color = Fore.BLACK
         else:
@@ -86,7 +89,7 @@ class Board():
             cell.hidden = False
             if cell.state == 'M':
                 self.unhideBoard()
-                self.displayBoard()
+                self.displayBoard(game_over=True)
                 print('You lose')
                 return 0
             self.freeSpaces -= 1
@@ -95,9 +98,10 @@ class Board():
         elif command == 'C' and not cell.hidden: # if the click an opened spot
             if cell.numTouchingFlags == int(cell.state):
                 no_mines_found = self.unhideNeighbors(row, col)
+                print(no_mines_found)
                 if not no_mines_found:
                     self.unhideBoard()
-                    self.displayBoard()
+                    self.displayBoard(game_over=True)
                     print('You lose')
                     return 0
         if self.freeSpaces == 0:
@@ -133,12 +137,14 @@ class Board():
             neighbors = getNeighbors(l[0][0], l[0][1], self.row, self.col)
             for pair in neighbors:
                 cell = self.mat[pair[0]][pair[1]]
-                if cell.state == "M":
+                print(pair, cell.state, cell.flagged)
+                if cell.state == "M" and not cell.flagged:
                     return False
                 if (pair not in l) and (cell.hidden) and (cell.numTouchingFlags == int(cell.state)):
                     l.append(pair)
             self.showNeighbors(l[0][0], l[0][1])
             l.remove(l[0])
+        return True
 
 
     def showNeighbors(self, i, j):
@@ -171,7 +177,7 @@ class Board():
                 self.mat[-1].append(cell)
 
 
-    def displayBoard(self):
+    def displayBoard(self, game_over=False):
         '''Generate the string to represent the board.'''
         minesMessageLength = 4*self.col + 1
         message = "Mines left: " + str(self.numMines - self.numFlagged)
@@ -188,7 +194,7 @@ class Board():
         for i in range(self.row):
             board += (" " + str(i%10) + " |")
             for j in range(self.col):
-                board += self.getCell(i, j).getString()
+                board += self.getCell(i, j).getString(game_over)
             board += '\n   ' + ('-'*(4*(self.col))) + '-\n'
         print(board)
 
